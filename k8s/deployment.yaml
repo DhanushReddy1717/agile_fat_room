@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-order-management
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce-order-management
+  template:
+    metadata:
+      labels:
+        app: ecommerce-order-management
+    spec:
+      containers:
+        - name: ecommerce-order-management
+          image: dhanushreddy17/ecommerce-order-management:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080

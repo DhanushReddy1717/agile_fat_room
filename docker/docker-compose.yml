@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+  ecommerce-order-management:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: ecommerce-order-management:latest
+    container_name: ecommerce-order-management
+    ports:
+      - "8080:8080"
