@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    parameters {
+        string(name: 'GIT_REPO_URL', defaultValue: '', description: 'Required only for Pipeline script jobs. Example: https://github.com/<user>/<repo>.git')
+        string(name: 'GIT_BRANCH', defaultValue: 'main', description: 'Git branch to build')
+        string(name: 'GIT_CREDENTIALS_ID', defaultValue: '', description: 'Optional Jenkins credential ID for private repositories')
+    }
+
     tools {
         maven 'M3'
         jdk 'Java21'
@@ -15,7 +21,26 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
+                script {
+                    try {
+                        checkout scm
+                    } catch (Exception ignored) {
+                        if (!params.GIT_REPO_URL?.trim()) {
+                            error('checkout scm is unavailable for this job type. Set GIT_REPO_URL parameter or use Pipeline script from SCM.')
+                        }
+
+                        def remoteConfig = [url: params.GIT_REPO_URL]
+                        if (params.GIT_CREDENTIALS_ID?.trim()) {
+                            remoteConfig.credentialsId = params.GIT_CREDENTIALS_ID
+                        }
+
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: params.GIT_BRANCH]],
+                            userRemoteConfigs: [remoteConfig]
+                        ])
+                    }
+                }
             }
         }
 
